@@ -3,7 +3,5 @@ Flask-Cors==4.0.0
 Flask-Limiter==2.8.1
 Flask-Talisman==1.0.0
 Flask-Caching==2.0.2
-pymorphy2==2.0.0
 gensim==4.3.1
-pyaspeller==0.5.6
 wget==3.2
