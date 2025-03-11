@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Косинусовые расстояния слов</title>
+    <link rel="stylesheet" href="styles.css"> 
+</head>
+<body>
+    <h1>Введите два слова</h1>
+    <h3>Слова должны быть русские, в нижнем регистре</h3>
+    <input type="text" id="word1" placeholder="Первое слово" oninput="this.value = this.value.replace(/[^а-яё]/g, '').toLowerCase();">
+    <input type="text" id="word2" placeholder="Второе слово" oninput="this.value = this.value.replace(/[^а-яё]/g, '').toLowerCase();">
+    <button onclick="sendWords()">Расчитать</button>
+
+    <h2>Результат:</h2>
+    <div id="result"></div>
+    <div id="comparison"></div> 
+
+
+    <div id="error-message"></div>
+
+    <script>
+        function validateInput(word, inputId) {
+            word = word.trim();
+
+            if (word.length < 2 || word.length > 30) {
+                document.getElementById(inputId).classList.add('invalid');
+                return 'Слово должно содержать не менее 2 и не более 30 символов.';
+            }
+
+            if (/\s/.test(word)) {
+                document.getElementById(inputId).classList.add('invalid');
+                return 'Слово не должно содержать пробелов.';
+            }
+
+            if (!/^[а-яё]+$/.test(word)) {
+                document.getElementById(inputId).classList.add('invalid');
+                return 'Слово должно содержать только русские буквы.';
+            }
+
+            if (word !== word.toLowerCase()) {
+                document.getElementById(inputId).classList.add('invalid');
+                return 'Слово должно быть в нижнем регистре.';
+            }
+
+            document.getElementById(inputId).classList.remove('invalid');
+            return '';
+        }
+
+        function showError(message) {
+            document.getElementById('error-message').innerText = message;
+        }
+
+        async function sendWords() {
+            const word1 = document.getElementById('word1').value;
+            const word2 = document.getElementById('word2').value;
+
+            const error1 = validateInput(word1, 'word1');
+            if (error1) {
+                showError(error1);
+                return;
+            }
+
+            const error2 = validateInput(word2, 'word2');
+            if (error2) {
+                showError(error2);
+                return;
+            }
+
+            showError('');
+
+            try {
+                const response = await fetch('https://127.0.0.1:5000/compare', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ word1, word2 }),
+                });
+
+                const data = await response.json();
+
+                document.getElementById('result').innerText = data.number;
+
+                document.getElementById('comparison').innerText = 
+                    `Косинусовое расстояние между словами ${data.word1} и ${data.word2}`;
+
+                document.getElementById('word1').value = '';
+                document.getElementById('word2').value = '';
+            } catch (error) {
+                console.error('Ошибка:', error);
+                alert('Произошла ошибка при отправке запроса. Возможно вы ввели несуществующее слово. Пожалуйста, попробуйте снова.');
+            }
+        }
+    </script>
+</body>
+</html>
