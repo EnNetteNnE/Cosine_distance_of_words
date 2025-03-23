@@ -6,13 +6,13 @@
 <img src="/img/1.png" alt="Поля ввода" width="350">
 
 <figcaption>Расчет расстояния</figcaption>
-<img src="/img/2.png" alt="Расчет расстояния" width="500">
+<img src="/img/2.png" alt="Расчет расстояния" width="350">
 
 <figcaption>Результат расчетов</figcaption>
-<img src="/img/3.png" alt="Результат расчетов" width="500">
+<img src="/img/3.png" alt="Результат расчетов" width="350">
 
 <figcaption>Валидация полей</figcaption>
-<img src="/img/4.png" alt="Валидация полей" width="500">
+<img src="/img/4.png" alt="Валидация полей" width="350">
 
 
 
