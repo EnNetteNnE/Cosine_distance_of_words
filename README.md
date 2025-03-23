@@ -2,10 +2,10 @@
 
 ***Скрины работы***
 
-<figure>
-  <img src="/img/1.png" alt="Поля ввода" width="500">
-  <figcaption>Поля ввода</figcaption>
-</figure>
+
+<img src="/img/1.png" alt="Поля ввода" width="350">
+<figcaption>Поля ввода</figcaption>
+
 <figure>
   <img src="/img/2.png" alt="Расчет расстояния" width="500">
   <figcaption>Расчет расстояния</figcaption>
