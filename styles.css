@@ -11,6 +11,16 @@ body {
     min-height: 100vh;
 }
 
+.form-container {
+    background: white;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+}
+
 h1 {
     font-size: 2.5rem;
     color: #444;
@@ -48,15 +58,9 @@ button:hover {
     background-color: #0056b3;
 }
 
-#result, #comparison {
-    margin-top: 20px;
-    font-size: 1.2rem;
-    color: #555;
-}
-
-#result {
-    font-weight: bold;
-    color: #007bff;
+button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
 }
 
 #error-message {
@@ -70,12 +74,35 @@ input.invalid {
     border-color: #ff4444;
 }
 
-.form-container {
-    background: white;
-    padding: 30px;
-    border-radius: 10px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    width: 100%;
-    max-width: 400px;
-    text-align: center;
+.similarity-result {
+    font-size: 1.5em;
+    font-weight: bold;
+    margin: 20px 0;
+    color: #2c3e50;
+}
+
+.word-info {
+    margin: 20px 0;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+    text-align: left;
+}
+
+.word-info h3 {
+    margin-top: 0;
+    color: #333;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+}
+
+.info-section {
+    margin-bottom: 10px;
+}
+
+.info-label {
+    font-weight: bold;
+    display: block;
+    margin-bottom: 5px;
 }
