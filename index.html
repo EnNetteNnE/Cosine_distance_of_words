@@ -1,24 +1,75 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Косинусовые расстояния слов</title>
-    <link rel="stylesheet" href="styles.css"> 
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <h1>Введите два слова</h1>
-    <h3>Слова должны быть русские, в нижнем регистре</h3>
-    <input type="text" id="word1" placeholder="Первое слово" oninput="this.value = this.value.replace(/[^а-яё]/g, '').toLowerCase();">
-    <input type="text" id="word2" placeholder="Второе слово" oninput="this.value = this.value.replace(/[^а-яё]/g, '').toLowerCase();">
-    <button onclick="sendWords()" id="calculate-button">Рассчитать</button>
+    <div class="form-container">
+        <h1>Введите два слова</h1>
+        <h3>Слова должны быть русские, в нижнем регистре</h3>
+        <input type="text" id="word1" placeholder="Первое слово" oninput="this.value = this.value.replace(/[^а-яё]/g, '').toLowerCase();">
+        <input type="text" id="word2" placeholder="Второе слово" oninput="this.value = this.value.replace(/[^а-яё]/g, '').toLowerCase();">
+        <button onclick="sendWords()" id="calculate-button">Рассчитать</button>
 
-    <h2>Результат:</h2>
-    <div id="result"></div>
-    <div id="comparison"></div> 
+        <div id="error-message"></div>
 
-    <!-- Сообщение об ошибке -->
-    <div id="error-message"></div>
+        <div id="results-container">
+            <div class="similarity-result">
+                Косинусовое расстояние: <span id="similarity-number"></span>
+            </div>
+            
+            <div class="word-info" id="word1-info">
+                <h3>Слово: <span id="word1-text"></span></h3>
+                
+                <div class="info-section">
+                    <span class="info-label">Синонимы:</span>
+                    <div id="word1-synonyms"></div>
+                </div>
+                
+                <div class="info-section">
+                    <span class="info-label">Антонимы:</span>
+                    <div id="word1-antonyms"></div>
+                </div>
+                
+                <div class="info-section">
+                    <span class="info-label">Родственные слова:</span>
+                    <div id="word1-related"></div>
+                </div>
+                
+                <div class="info-section">
+                    <span class="info-label">Контекст:</span>
+                    <div id="word1-context"></div>
+                </div>
+            </div>
+            
+            <div class="word-info" id="word2-info">
+                <h3>Слово: <span id="word2-text"></span></h3>
+                
+                <div class="info-section">
+                    <span class="info-label">Синонимы:</span>
+                    <div id="word2-synonyms"></div>
+                </div>
+                
+                <div class="info-section">
+                    <span class="info-label">Антонимы:</span>
+                    <div id="word2-antonyms"></div>
+                </div>
+                
+                <div class="info-section">
+                    <span class="info-label">Родственные слова:</span>
+                    <div id="word2-related"></div>
+                </div>
+                
+                <div class="info-section">
+                    <span class="info-label">Контекст:</span>
+                    <div id="word2-context"></div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script>
         function validateInput(word, inputId) {
@@ -52,8 +103,15 @@
             document.getElementById('error-message').innerText = message;
         }
 
+        function formatList(items) {
+            if (items === "не найдено") {
+                return "не найдено";
+            }
+            return items.split(', ').join(', ');
+        }
+
         async function sendWords() {
-            const button = document.getElementById('calculate-button'); // Получаем кнопку
+            const button = document.getElementById('calculate-button');
             const word1 = document.getElementById('word1').value;
             const word2 = document.getElementById('word2').value;
 
@@ -71,12 +129,11 @@
 
             showError('');
 
-            // Блокируем кнопку и меняем текст
             button.disabled = true;
             button.textContent = 'Подождите...';
 
             try {
-                const response = await fetch('http://217.71.129.139:4594/compare', {
+                const response = await fetch('http://217.71.129.139:5543/compare', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -86,23 +143,36 @@
 
                 const data = await response.json();
 
-                // Обновляем результаты
-                document.getElementById('result').innerText = data.number;
-                document.getElementById('comparison').innerText = 
-                    `Косинусовое расстояние между словами ${data.word1} и ${data.word2}`;
+                document.getElementById('results-container').style.display = 'block';
+                document.getElementById('similarity-number').textContent = data.number;
+                
+                document.getElementById('word1-text').textContent = data.word1;
+                document.getElementById('word1-synonyms').textContent = formatList(data.synonyms1);
+                document.getElementById('word1-antonyms').textContent = formatList(data.antonym1);
+                document.getElementById('word1-related').textContent = formatList(data.related1);
+                document.getElementById('word1-context').textContent = formatList(data.context1);
+                
+                document.getElementById('word2-text').textContent = data.word2;
+                document.getElementById('word2-synonyms').textContent = formatList(data.synonyms2);
+                document.getElementById('word2-antonyms').textContent = formatList(data.antonym2);
+                document.getElementById('word2-related').textContent = formatList(data.related2);
+                document.getElementById('word2-context').textContent = formatList(data.context2);
 
-                // Очищаем поля ввода
                 document.getElementById('word1').value = '';
                 document.getElementById('word2').value = '';
             } catch (error) {
                 console.error('Ошибка:', error);
                 alert('Произошла ошибка при отправке запроса. Возможно вы ввели несуществующее слово. Пожалуйста, попробуйте снова.');
             } finally {
-                // Возвращаем кнопке исходное состояние
                 button.disabled = false;
                 button.textContent = 'Рассчитать';
             }
         }
+
+        // Скрываем контейнер с результатами при загрузке страницы
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('results-container').style.display = 'none';
+        });
     </script>
 </body>
 </html>
