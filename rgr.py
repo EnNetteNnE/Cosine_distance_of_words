@@ -4,11 +4,13 @@ from flask_cors import CORS
 import zipfile
 import wget
 import gensim
+from flask_wtf.csrf import CSRFProtect
 import pymorphy2
 import requests
 
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
+from flask_talisman import Talisman
 from flask_caching import Cache
 from pymorphy2 import MorphAnalyzer
 
@@ -90,6 +92,10 @@ limiter = Limiter(
     app=app,
     default_limits=["200 per day", "50 per hour"] 
 )
+
+talisman = Talisman(app)
+
+csrf = CSRFProtect(app)
 
 def make_cache_key(*args, **kwargs):
     data = request.get_json()
@@ -194,12 +200,22 @@ def get_related_words(word):
         return "не найдено"
     
 
+@app.route('/get-csrf-token', methods=['GET'])
+def get_csrf_token():
+    csrf_token = generate_csrf()
+    print(csrf_token)
+    return jsonify({'csrf_token': csrf_token})
+
 cache = Cache(app, config={'CACHE_TYPE': 'SimpleCache'})
 
 @app.route('/compare', methods=['POST'])
 @limiter.limit("10 per minute")  
 @cache.cached(timeout=60, key_prefix=make_cache_key)
 def compare_words():
+    csrf_token = request.headers.get('X-CSRFToken') or request.json.get('csrf_token')
+    if not csrf_token or not csrf.protect(csrf_token=csrf_token):
+        return jsonify({"error": "Invalid CSRF token"}), 403
+    
     data = request.get_json()
     if not data or 'word1' not in data or 'word2' not in data:
         return jsonify({"error": "Invalid input"}), 400
@@ -244,6 +260,6 @@ def compare_words():
 
 
 if __name__ == '__main__':
-    app.run(debug=True) 
+    app.run(ssl_context=('cert.pem', 'key.pem'), debug=True) 
 
 
