@@ -71,7 +71,32 @@
         </div>
     </div>
 
-    <script>
+       <script>
+        let csrfToken = ''; // Глобальная переменная для хранения CSRF-токена
+
+        // Функция для получения CSRF-токена
+        async function getCsrfToken() {
+            try {
+                const response = await fetch('http://217.71.129.139:5543/get-csrf-token');
+                const data = await response.json();
+                csrfToken = data.csrf_token;
+                console.log('CSRF token received:', csrfToken);
+            } catch (error) {
+                console.error('Ошибка при получении CSRF-токена:', error);
+                throw new Error('Не удалось получить CSRF-токен');
+            }
+        }
+
+        // Получаем токен при загрузке страницы
+        document.addEventListener('DOMContentLoaded', async function() {
+            document.getElementById('results-container').style.display = 'none';
+            try {
+                await getCsrfToken();
+            } catch (error) {
+                alert('Ошибка инициализации. Пожалуйста, перезагрузите страницу.');
+            }
+        });
+
         function validateInput(word, inputId) {
             word = word.trim();
 
@@ -133,13 +158,25 @@
             button.textContent = 'Подождите...';
 
             try {
+                // Обновляем токен перед каждым запросом
+                await getCsrfToken();
+
                 const response = await fetch('http://217.71.129.139:5543/compare', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
+                        'X-CSRFToken': csrfToken  // Добавляем CSRF-токен в заголовок
                     },
-                    body: JSON.stringify({ word1, word2 }),
+                    body: JSON.stringify({ 
+                        word1, 
+                        word2,
+                        csrf_token: csrfToken  // Или можно передавать в теле запроса
+                    }),
                 });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
 
                 const data = await response.json();
 
@@ -162,17 +199,12 @@
                 document.getElementById('word2').value = '';
             } catch (error) {
                 console.error('Ошибка:', error);
-                alert('Произошла ошибка при отправке запроса. Возможно вы ввели несуществующее слово. Пожалуйста, попробуйте снова.');
+                alert('Произошла ошибка при отправке запроса. Возможно вы ввели несуществующее слово или сессия истекла. Пожалуйста, попробуйте снова.');
             } finally {
                 button.disabled = false;
                 button.textContent = 'Рассчитать';
             }
         }
-
-        // Скрываем контейнер с результатами при загрузке страницы
-        document.addEventListener('DOMContentLoaded', function() {
-            document.getElementById('results-container').style.display = 'none';
-        });
     </script>
 </body>
 </html>
