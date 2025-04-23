@@ -72,9 +72,8 @@
     </div>
 
        <script>
-        let csrfToken = ''; // Глобальная переменная для хранения CSRF-токена
+        let csrfToken = ''; 
 
-        // Функция для получения CSRF-токена
         async function getCsrfToken() {
             try {
                 const response = await fetch('http://217.71.129.139:5543/get-csrf-token');
@@ -87,7 +86,6 @@
             }
         }
 
-        // Получаем токен при загрузке страницы
         document.addEventListener('DOMContentLoaded', async function() {
             document.getElementById('results-container').style.display = 'none';
             try {
@@ -158,19 +156,18 @@
             button.textContent = 'Подождите...';
 
             try {
-                // Обновляем токен перед каждым запросом
                 await getCsrfToken();
 
                 const response = await fetch('http://217.71.129.139:5543/compare', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'X-CSRFToken': csrfToken  // Добавляем CSRF-токен в заголовок
+                        'X-CSRFToken': csrfToken  
                     },
                     body: JSON.stringify({ 
                         word1, 
                         word2,
-                        csrf_token: csrfToken  // Или можно передавать в теле запроса
+                        csrf_token: csrfToken  
                     }),
                 });
 
